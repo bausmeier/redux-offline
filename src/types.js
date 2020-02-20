@@ -89,7 +89,11 @@ type NetworkCallback = (result: boolean) => void;
 export type Config = {
   detectNetwork: (callback: NetworkCallback) => void,
   persist: (store: any, options: {}, callback: () => void) => any,
-  effect: (effect: any, action: OfflineAction) => Promise<*>,
+  effect: (
+    effect: any,
+    action: OfflineAction,
+    getState: () => any
+  ) => Promise<*>,
   retry: (action: OfflineAction, retries: number) => ?number,
   discard: (error: any, action: OfflineAction, retries: number) => boolean,
   persistOptions: {},

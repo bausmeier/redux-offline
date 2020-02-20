@@ -35,7 +35,13 @@ export const createOfflineMiddleware = (config: Config) => (store: any) => (
     !offline.retryScheduled &&
     offline.online
   ) {
-    send(offlineAction, store.dispatch, config, offline.retryCount);
+    send(
+      offlineAction,
+      store.dispatch,
+      store.getState,
+      config,
+      offline.retryCount
+    );
   }
 
   if (action.type === OFFLINE_SCHEDULE_RETRY) {
@@ -45,7 +51,13 @@ export const createOfflineMiddleware = (config: Config) => (store: any) => (
   }
 
   if (action.type === OFFLINE_SEND && offlineAction && !offline.busy) {
-    send(offlineAction, store.dispatch, config, offline.retryCount);
+    send(
+      offlineAction,
+      store.dispatch,
+      store.getState,
+      config,
+      offline.retryCount
+    );
   }
 
   return promise || result;

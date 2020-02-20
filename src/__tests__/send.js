@@ -13,6 +13,7 @@ function setup(partialConfig) {
   const defaultConfig = {
     effect: jest.fn(() => Promise.resolve()),
     discard: () => false,
+    getState: () => ({}),
     retry: () => DELAY,
     defaultCommit: defaultCommitAction,
     defaultRollback: defaultRollbackAction,
@@ -37,8 +38,8 @@ function setup(partialConfig) {
 }
 
 test('dispatches busy action', () => {
-  const { action, config, dispatch } = setup();
-  const promise = send(action, dispatch, config);
+  const { action, config, dispatch, getState } = setup();
+  const promise = send(action, dispatch, getState, config);
 
   expect.assertions(2);
   return promise.then(() => {
@@ -48,16 +49,16 @@ test('dispatches busy action', () => {
 });
 
 test('requests resource using effects reconciler', () => {
-  const { action, config, dispatch } = setup();
-  send(action, dispatch, config);
-  expect(config.effect).toBeCalledWith(action.meta.offline.effect, action);
+  const { action, config, dispatch, getState } = setup();
+  send(action, dispatch, getState, config);
+  expect(config.effect).toBeCalledWith(action.meta.offline.effect, action, getState);
 });
 
 describe('when request succeeds', () => {
   test('dispatches complete action', () => {
     const effect = () => Promise.resolve();
-    const { action, config, dispatch } = setup({ effect });
-    const promise = send(action, dispatch, config);
+    const { action, config, dispatch, getState } = setup({ effect });
+    const promise = send(action, dispatch, getState, config);
 
     const { commit } = action.meta.offline;
     expect.assertions(2);
@@ -71,8 +72,8 @@ describe('when request succeeds', () => {
 describe('when request fails', () => {
   test('dispatches schedule retry action', () => {
     const effect = () => Promise.reject();
-    const { action, config, dispatch } = setup({ effect });
-    const promise = send(action, dispatch, config);
+    const { action, config, dispatch, getState } = setup({ effect });
+    const promise = send(action, dispatch, getState, config);
 
     expect.assertions(1);
     return promise.then(() => {
@@ -83,8 +84,8 @@ describe('when request fails', () => {
   test('dispatches complete action on discard', () => {
     const effect = () => Promise.reject();
     const discard = () => true;
-    const { action, config, dispatch } = setup({ effect, discard });
-    const promise = send(action, dispatch, config);
+    const { action, config, dispatch, getState } = setup({ effect, discard });
+    const promise = send(action, dispatch, getState, config);
 
     const { rollback } = action.meta.offline;
     expect.assertions(2);
@@ -97,8 +98,8 @@ describe('when request fails', () => {
   test('dispatches complete action with promised discard', () => {
     const effect = () => Promise.reject();
     const discard = () => Promise.resolve(true);
-    const { action, config, dispatch } = setup({ effect, discard });
-    const promise = send(action, dispatch, config);
+    const { action, config, dispatch, getState } = setup({ effect, discard });
+    const promise = send(action, dispatch, getState, config);
 
     const { rollback } = action.meta.offline;
     expect.assertions(2);
@@ -111,8 +112,8 @@ describe('when request fails', () => {
   test('dispatches complete action when discard throw an exception', () => {
     const effect = () => Promise.reject();
     const discard = () => {throw new Error};
-    const { action, config, dispatch } = setup({ effect, discard });
-    const promise = send(action, dispatch, config);
+    const { action, config, dispatch, getState } = setup({ effect, discard });
+    const promise = send(action, dispatch, getState, config);
 
     const { rollback } = action.meta.offline;
     expect.assertions(2);
@@ -136,9 +137,9 @@ describe('when request succeeds and commit is undefined', () => {
       },
     };
 
-    const { config, dispatch } = setup({ effect });
+    const { config, dispatch, getState } = setup({ effect });
 
-    const promise = send(action, dispatch, config)
+    const promise = send(action, dispatch, getState, config)
 
     return promise.then(() => {
       expect(dispatch).toBeCalledWith(expect.objectContaining(defaultCommitAction));
@@ -161,9 +162,9 @@ describe('when request is to be discarded and rollback is undefined', () => {
       },
     };
 
-    const { config, dispatch } = setup({ effect, discard });
+    const { config, dispatch, getState } = setup({ effect, discard });
 
-    const promise = send(action, dispatch, config)
+    const promise = send(action, dispatch, getState, config)
 
     return promise.then(() => {
       expect(dispatch).toBeCalledWith(expect.objectContaining(defaultRollbackAction));
@@ -183,8 +184,8 @@ describe('offlineActionTracker', () => {
   })
   test('resolves action on successful complete', () => {
     const effect = () => Promise.resolve();
-    const { action, config, dispatch } = setup({ effect });
-    const promise = send(action, dispatch, {
+    const { action, config, dispatch, getState } = setup({ effect });
+    const promise = send(action, dispatch, getState, {
       ...config,
       offlineActionTracker: trackerMock
     });
@@ -196,8 +197,8 @@ describe('offlineActionTracker', () => {
   test('rejects action on failed complete', () => {
     const effect = () => Promise.reject(new Error());
     const discard = () => true;
-    const { action, config, dispatch } = setup({ effect, discard });
-    const promise = send(action, dispatch, {
+    const { action, config, dispatch, getState } = setup({ effect, discard });
+    const promise = send(action, dispatch, getState, {
       ...config,
       offlineActionTracker: trackerMock
     });

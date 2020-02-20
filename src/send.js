@@ -46,13 +46,14 @@ const handleJsError = (error: Error): ResultAction =>
 const send = (
   action: OfflineAction,
   dispatch: any => any,
+  getState: () => any,
   config: Config,
   retries: number = 0
 ) => {
   const metadata = action.meta.offline;
   dispatch(busy(true));
   return config
-    .effect(metadata.effect, action)
+    .effect(metadata.effect, action, getState)
     .then(result => {
       const commitAction =
         metadata.commit ||
