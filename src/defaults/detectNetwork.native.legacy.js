@@ -67,7 +67,8 @@ class LegacyDetectNetwork {
   _setIsConnectionExpensive = async () => {
     try {
       const networkConnectionDetails = await NetInfo.fetch();
-      this._isConnectionExpensive = networkConnectionDetails.details.isConnectionExpensive;
+      this._isConnectionExpensive =
+        networkConnectionDetails.details.isConnectionExpensive;
     } catch (err) {
       // err means that isConnectionExpensive is not supported in iOS
       this._isConnectionExpensive = null;
