@@ -1,5 +1,5 @@
 {
-  "name": "@bausmeier/redux-offline",
+  "name": "@decodedev/redux-offline",
   "version": "2.6.0",
   "description": "Redux Offline-First Architecture",
   "main": "lib/index.js",
@@ -61,6 +61,7 @@
     "redux-persist": "^4.6.0"
   },
   "peerDependencies": {
-    "redux": ">=3"
+    "redux": ">=3",
+    "@react-native-community/netinfo": "^3"
   }
 }
